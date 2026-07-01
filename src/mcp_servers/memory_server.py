@@ -29,9 +29,28 @@ def store_document(collection_name: str, content: str, source_url: str = "") -> 
         # For this tool, we assume the agent or another skill handles chunking,
         # or we store it directly if it's within embedding limits.
         
-        # Simple chunking to prevent embedding crash on massive texts
-        max_length = 5000 
-        chunks = [content[i:i+max_length] for i in range(0, len(content), max_length)]
+        # Smart chunking to prevent embedding crash on massive texts
+        # Splits by paragraphs/newlines first to avoid cutting words in half
+        chunks = []
+        max_length = 4000
+        paragraphs = content.split('\n\n')
+        
+        current_chunk = ""
+        for p in paragraphs:
+            if len(current_chunk) + len(p) < max_length:
+                current_chunk += p + "\n\n"
+            else:
+                if current_chunk:
+                    chunks.append(current_chunk.strip())
+                # If a single paragraph is huge, forcefully slice it
+                if len(p) > max_length:
+                    for i in range(0, len(p), max_length):
+                        chunks.append(p[i:i+max_length])
+                    current_chunk = ""
+                else:
+                    current_chunk = p + "\n\n"
+        if current_chunk:
+            chunks.append(current_chunk.strip())
         
         ids = [f"{doc_id}_{i}" for i in range(len(chunks))]
         metadatas = [{"source": source_url, "chunk": i} for i in range(len(chunks))]
@@ -74,6 +93,26 @@ def query_memory(collection_name: str, query: str, n_results: int = 5) -> str:
         return "\n".join(formatted_results)
     except Exception as e:
         return f"Error querying memory: {str(e)}"
+
+@mcp.tool()
+def list_collections() -> str:
+    """Lists all active research collections in the vector memory."""
+    try:
+        collections = client.list_collections()
+        if not collections:
+            return "No active collections found."
+        return "\n".join([c.name for c in collections])
+    except Exception as e:
+        return f"Error listing collections: {str(e)}"
+
+@mcp.tool()
+def delete_collection(collection_name: str) -> str:
+    """Deletes an entire research collection to free up space or clear old data."""
+    try:
+        client.delete_collection(name=collection_name)
+        return f"Successfully deleted collection: {collection_name}"
+    except Exception as e:
+        return f"Error deleting collection: {str(e)}"
 
 if __name__ == "__main__":
     print("Starting ReseAIrch-Memory MCP Server...", flush=True)
