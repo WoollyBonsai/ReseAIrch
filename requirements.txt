@@ -1,0 +1,11 @@
+typer
+rich
+fastapi
+uvicorn
+litellm
+playwright
+beautifulsoup4
+chromadb
+python-dotenv
+mcp[cli]  # Standard Model Context Protocol SDK
+pydantic
