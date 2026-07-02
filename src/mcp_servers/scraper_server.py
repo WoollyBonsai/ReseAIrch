@@ -75,7 +75,10 @@ async def scrape_url(url: str, method: str = "playwright") -> str:
         # Default to Playwright (best for Captcha bypass and dynamic JS)
         try:
             async with async_playwright() as p:
-                browser = await p.chromium.launch(headless=True)
+                browser = await p.chromium.launch(
+                    headless=False,
+                    args=['--disable-blink-features=AutomationControlled']
+                )
                 
                 # Context with custom headers and cookies
                 context = await browser.new_context(

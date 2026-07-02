@@ -32,9 +32,9 @@ class CoderAgent:
             CRITICAL RULES:
             1. You MUST use the `versatile_scrape` function from our utils to bypass Cloudflare/Captchas.
             2. The function signature is `async def versatile_scrape(url: str, use_stealth: bool = True) -> str`.
-            3. The function returns raw text or HTML from the page after bypassing captchas.
-            4. You must write the asyncio boilerplate and parse the returned text.
-            5. Print your final extracted data so the engine can capture stdout.
+            3. The function returns RAW TEXT (all HTML tags are already stripped out).
+            4. Do NOT attempt to parse, split, or use BeautifulSoup on the returned data. It will cause an IndexError.
+            5. Just PRINT the raw text so the engine can capture stdout.
             6. Do NOT use standard `requests` or `urllib` because they will be blocked.
             
             Example Format:
@@ -42,9 +42,8 @@ class CoderAgent:
             from src.utils.versatile_scraper import versatile_scrape
             
             async def main():
-                html = await versatile_scrape("{url}")
-                # Parse data from html string here if needed
-                print(html[:5000]) # Example output
+                text = await versatile_scrape("{url}")
+                print(text) 
                 
             asyncio.run(main())
             
@@ -74,8 +73,10 @@ class CoderAgent:
                     
                 print(f"[Coder Agent] Executing generated script: {script_path}")
                 
-                # Execute in the venv environment
-                result = subprocess.run(["python", script_path], capture_output=True, text=True, timeout=60)
+                # Execute in the venv environment with PYTHONPATH set to root
+                env = os.environ.copy()
+                env["PYTHONPATH"] = os.getcwd()
+                result = subprocess.run(["python", script_path], capture_output=True, text=True, timeout=60, env=env)
                 
                 if result.returncode == 0 and len(result.stdout) > 50:
                     print(f"[Coder Agent] Execution Successful! Storing {len(result.stdout)} bytes to memory.")
