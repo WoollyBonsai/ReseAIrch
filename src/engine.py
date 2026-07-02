@@ -5,6 +5,8 @@ from typing import Dict, Any
 from src.agents.planner import PlannerAgent
 from src.agents.harvester import HarvesterAgent
 from src.agents.synthesizer import SynthesizerAgent
+from src.agents.reviewer import ReviewerAgent
+from src.agents.coder import CoderAgent
 
 class ADKEngine:
     """
@@ -17,6 +19,8 @@ class ADKEngine:
         self.planner = PlannerAgent(model_source=model_source)
         self.harvester = HarvesterAgent()
         self.synthesizer = SynthesizerAgent(model_source=model_source)
+        self.reviewer = ReviewerAgent(model_source=model_source)
+        self.coder = CoderAgent(model_source=model_source)
 
     async def run_research_pipeline(self, objective: str, max_depth: int = 1, collection_name: str = "default_research") -> Dict[str, Any]:
         """
@@ -31,11 +35,18 @@ class ADKEngine:
         print(f"Planned {len(dag.get('tasks', []))} tasks. Demanded format: {format_demand}")
 
         print("\n--- [Phase 2: Harvesting] ---")
-        # In a real environment, this connects over MCP protocol to the Scraper Server
-        # and pipes data to the Memory Server.
         await self.harvester.run_dag(dag, collection_name)
 
-        print("\n--- [Phase 3: Synthesizing] ---")
+        print("\n--- [Phase 3: Review & Reflection] ---")
+        failed_urls = self.reviewer.evaluate_harvest(collection_name, dag)
+        
+        if failed_urls:
+            print(f"\n--- [Phase 3b: Coder Execution (Fallback)] ---")
+            print(f"Deploying dynamic Coder Agent for {len(failed_urls)} blocked targets...")
+            for url in failed_urls:
+                self.coder.write_and_execute(url, collection_name, objective)
+
+        print("\n--- [Phase 4: Synthesizing] ---")
         # Pulls data from Memory Server and formats it
         await self.synthesizer.generate_output(objective, collection_name, format_demand)
         
