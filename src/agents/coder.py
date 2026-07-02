@@ -44,10 +44,12 @@ class CoderAgent:
                 )
                 
                 script_code = response.choices[0].message.content.strip()
-                if script_code.startswith("```python"):
-                    script_code = script_code[9:-3].strip()
-                elif script_code.startswith("```"):
-                    script_code = script_code[3:-3].strip()
+                
+                # Robust extraction for chatty models
+                if "```python" in script_code:
+                    script_code = script_code.split("```python")[1].split("```")[0].strip()
+                elif "```" in script_code:
+                    script_code = script_code.split("```")[1].strip()
                     
                 script_path = os.path.join(self.scripts_dir, self._sanitize_filename(url))
                 with open(script_path, "w", encoding="utf-8") as f:

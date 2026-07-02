@@ -39,13 +39,21 @@ class SynthesizerAgent:
                 response_format={ "type": "json_object" } if "ollama" not in self.model else None # Ollama handles json prompting via system prompt, OpenAI uses this
             )
             content = response.choices[0].message.content.strip()
-            # Clean up if model wrapped in markdown anyway
-            if content.startswith("```json"):
-                content = content[7:]
-            if content.endswith("```"):
-                content = content[:-3]
-            
-            return json.loads(content.strip(), strict=False)
+            try:
+                # Some models might wrap JSON inside ```json
+                if "```json" in content:
+                    json_str = content.split("```json")[1].split("```")[0].strip()
+                elif "```" in content:
+                    json_str = content.split("```")[1].strip()
+                else:
+                    json_str = content
+                    
+                return json.loads(json_str, strict=False)
+            except Exception:
+                # If it's completely not JSON, assume the model generated a single raw markdown report
+                print("Synthesizer could not parse JSON, falling back to raw markdown dump.")
+                return {"final_report_fallback.md": content}
+                
         except Exception as e:
             print(f"Synthesizer Error: {e}")
             return {"error_report.txt": str(e), "raw_fallback.txt": raw_context[:1000]}
