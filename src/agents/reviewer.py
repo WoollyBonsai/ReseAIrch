@@ -1,7 +1,7 @@
 import os
 import json
 from litellm import completion
-from src.mcp_servers.memory_server import search_documents
+from src.mcp_servers.memory_server import query_memory
 
 class ReviewerAgent:
     """
@@ -26,14 +26,12 @@ class ReviewerAgent:
             if not url.startswith("http"):
                 continue
                 
-            docs = search_documents(collection_name, query=url, n_results=1)
+            content = query_memory(collection_name, query=url, n_results=1)
             
-            if not docs or not docs[0]:
-                print(f"[Reviewer Agent] No data found in memory for {url}")
+            if "No relevant information found" in content or "Error querying" in content:
+                print(f"[Reviewer Agent] No valid data found in memory for {url}")
                 failed_urls.append(url)
                 continue
-                
-            content = docs[0]
             
             # Simple heuristic checks before calling LLM
             block_keywords = ["access denied", "403 forbidden", "captcha", "security check", "cloudflare", "verify you are human"]
