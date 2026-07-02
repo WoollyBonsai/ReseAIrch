@@ -16,12 +16,18 @@ class PlannerAgent:
         print(f"Planner Agent creating execution DAG for: {objective}")
         
         system_prompt = """
-        You are the Planner Agent. Your job is to break down a research objective into a JSON array of specific web queries or URLs to investigate.
+        You are the ADK Planner Agent. Your job is to orchestrate a deep, smart web scraping workflow.
+        You must break down the user's objective into a JSON array of specific web queries AND specific URLs to investigate.
+        If the objective is broad, your first task should be a search query (e.g., 'Google Dorks for SQLi' or a specific target URL).
+        Subsequent tasks should represent the deep links that we expect to find and crawl. 
+        You must also specify if cookies are needed for a specific target.
+        
         Return ONLY valid JSON. Format:
         {
             "format_demand": "JSON-L | Markdown | CSV",
             "tasks": [
-                {"id": "t1", "query": "specific search or URL", "type": "scrape|search"}
+                {"id": "t1", "query": "SQL injection guide site:owasp.org", "type": "search"},
+                {"id": "t2", "query": "https://portswigger.net/web-security/sql-injection", "type": "scrape", "use_cookies": true}
             ]
         }
         """
