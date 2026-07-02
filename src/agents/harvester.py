@@ -1,40 +1,45 @@
 import os
 import asyncio
-# In a real environment, the Harvester connects to the Scraper MCP Server via the MCP Client protocol.
-# For this scaffold, we simulate the MCP client invocation.
+from src.mcp_servers.scraper_server import scrape_url
+from src.mcp_servers.memory_server import store_document
 
 class HarvesterAgent:
     """
     ADK Harvester Agent.
-    Specialized in iterating over the Planner's DAG, dispatching commands to the Scraping MCP Server,
-    and pushing results to the Memory MCP Server. Built for resilience and long-runs.
+    Specialized in iterating over the Planner's DAG, dispatching commands to the Scraping Server,
+    and pushing results to Memory.
     """
     def __init__(self):
-        # We would initialize the MCP clients here
         self.mcp_scraper = "ReseAIrch-Scraper"
-        self.mcp_memory = "ReseAIrch-Memory"
 
     async def execute_task(self, task: dict, collection_name: str):
-        query_or_url = task.get("query")
-        print(f"Harvester Agent dispatching MCP Scraper for: {query_or_url}")
+        query = task.get("query", "")
         
-        # Simulated MCP Call to scrape_url tool
-        # result = await mcp_client.call_tool("scrape_url", url=query_or_url, method="playwright")
+        # If the planner generated a search term instead of a URL, format it as a duckduckgo search
+        url = query if query.startswith("http") else f"https://html.duckduckgo.com/html/?q={query.replace(' ', '+')}"
         
-        # After scraping, store in Memory MCP
-        # await mcp_client.call_tool("store_document", collection_name=collection_name, content=result)
+        print(f"Harvester Agent fetching: {url}")
         
-        await asyncio.sleep(1) # Simulate network IO
-        return True
+        # Execute actual scrape
+        try:
+            result = await scrape_url(url, method="bs4")
+            
+            if result and len(result) > 50:
+                store_document(collection_name=collection_name, content=result, source_url=url)
+                return True
+        except Exception as e:
+            print(f"Scrape failed for {url}: {e}")
+            
+        return False
 
     async def run_dag(self, dag: dict, collection_name: str):
         tasks = dag.get("tasks", [])
         print(f"Harvester starting batch processing of {len(tasks)} tasks...")
         
         for task in tasks:
-            # Long-run optimization: rate limiting and checkpointing
             success = await self.execute_task(task, collection_name)
             if not success:
-                print(f"Task failed, retrying later: {task['id']}")
+                print(f"Task failed, retrying later: {task.get('id')}")
+            await asyncio.sleep(2) # Polite delay
                 
         print("Harvester run complete.")

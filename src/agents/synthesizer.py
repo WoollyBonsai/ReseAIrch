@@ -1,10 +1,11 @@
 import os
 from litellm import completion
+from src.mcp_servers.memory_server import query_memory
 
 class SynthesizerAgent:
     """
     ADK Synthesizer Agent.
-    Responsible for fetching data from the Memory MCP Server and converting it into
+    Responsible for fetching data from the Memory Server and converting it into
     the user's demanded format (e.g., Markdown summary, JSON-L for training).
     """
     def __init__(self, model_source="ollama/mistral-nemo"):
@@ -35,11 +36,12 @@ class SynthesizerAgent:
             return f"Synthesizer Error: {e}"
 
     async def generate_output(self, objective: str, collection_name: str, format_demand: str):
-        # Simulated MCP Call to Memory Server
-        # raw_context = await mcp_client.call_tool("query_memory", collection_name=collection_name, query=objective, n_results=10)
+        # Actual Call to Memory Server
+        raw_context = query_memory(collection_name=collection_name, query=objective, n_results=10)
         
-        raw_context = "[Simulated data retrieved from ChromaDB Memory MCP]"
-        
+        if "Error" in raw_context or "No relevant information found" in raw_context:
+            print("Warning: Could not retrieve robust context from memory.")
+            
         final_output = self.apply_dynamic_formatting(raw_context, format_demand)
         
         # Save output
