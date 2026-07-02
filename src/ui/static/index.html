@@ -41,6 +41,16 @@
                     <label for="collection">Memory Collection</label>
                     <input type="text" id="collection" value="default_research" placeholder="e.g., project_quantum">
                 </div>
+                <div class="form-group" style="margin-top: 20px;">
+                    <h3>Past Operations</h3>
+                    <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px;">
+                        <button id="refresh-history-btn" class="glass-btn" style="flex:1; padding:5px; font-size:12px;">Refresh</button>
+                        <button id="delete-raw-btn" class="glass-btn" style="flex:1; padding:5px; font-size:12px; background:rgba(239,68,68,0.2);">Delete Raws</button>
+                        <button id="delete-processed-btn" class="glass-btn" style="flex:1; padding:5px; font-size:12px; background:rgba(239,68,68,0.2);">Delete Processed</button>
+                    </div>
+                    <ul id="history-list" style="list-style:none; padding:0; font-size:0.85em; max-height:180px; overflow-y:auto; border-top: 1px solid rgba(255,255,255,0.1); padding-top:10px;">
+                    </ul>
+                </div>
             </aside>
 
             <section class="workspace glass-panel">

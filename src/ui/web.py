@@ -25,6 +25,43 @@ async def run_pipeline(req: ResearchRequest):
     except Exception as e:
         return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
 
+@app.get("/api/history")
+def get_history():
+    raw_dir = os.path.join(project_root, "workspace", "raw")
+    processed_dir = os.path.join(project_root, "workspace", "processed")
+    raws = os.listdir(raw_dir) if os.path.exists(raw_dir) else []
+    processed = os.listdir(processed_dir) if os.path.exists(processed_dir) else []
+    return JSONResponse(content={"raw": raws, "processed": processed})
+
+@app.get("/api/history/read/{filename}")
+def read_history(filename: str):
+    raw_path = os.path.join(project_root, "workspace", "raw", filename)
+    proc_path = os.path.join(project_root, "workspace", "processed", filename)
+    
+    if os.path.exists(proc_path):
+        with open(proc_path, "r", encoding="utf-8") as f:
+            return JSONResponse(content={"content": f.read()})
+    elif os.path.exists(raw_path):
+        with open(raw_path, "r", encoding="utf-8") as f:
+            return JSONResponse(content={"content": f.read()[:5000] + "\n...[TRUNCATED]"})
+    return JSONResponse(status_code=404, content={"message": "File not found"})
+
+@app.delete("/api/history/delete/raw")
+def delete_raw():
+    raw_dir = os.path.join(project_root, "workspace", "raw")
+    if os.path.exists(raw_dir):
+        for f in os.listdir(raw_dir):
+            os.remove(os.path.join(raw_dir, f))
+    return JSONResponse(content={"status": "success"})
+
+@app.delete("/api/history/delete/processed")
+def delete_processed():
+    processed_dir = os.path.join(project_root, "workspace", "processed")
+    if os.path.exists(processed_dir):
+        for f in os.listdir(processed_dir):
+            os.remove(os.path.join(processed_dir, f))
+    return JSONResponse(content={"status": "success"})
+
 # Serve static files
 app.mount("/static", StaticFiles(directory=os.path.join(os.path.dirname(__file__), "static")), name="static")
 

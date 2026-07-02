@@ -30,7 +30,7 @@ class HarvesterAgent:
         
         # Execute actual scrape
         try:
-            result = await scrape_url(url, method="bs4")
+            result = await scrape_url(url, method="playwright")
             
             if result and len(result) > 50:
                 # Save Raw Unprocessed Data

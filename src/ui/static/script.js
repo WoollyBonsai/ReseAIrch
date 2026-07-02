@@ -76,4 +76,56 @@ document.addEventListener("DOMContentLoaded", () => {
             dispatchAgents();
         }
     });
+
+    // History Logic
+    const historyList = document.getElementById("history-list");
+    const loadHistory = async () => {
+        try {
+            const res = await fetch("/api/history");
+            const data = await res.json();
+            historyList.innerHTML = "";
+            
+            if(data.processed && data.processed.length > 0) {
+                historyList.innerHTML += "<li style='color:#34d399;font-weight:bold;'>Processed:</li>";
+                data.processed.forEach(f => {
+                    historyList.innerHTML += `<li style="cursor:pointer; margin-bottom:4px;" onclick="readHistory('${f}')">📄 ${f}</li>`;
+                });
+            }
+            if(data.raw && data.raw.length > 0) {
+                historyList.innerHTML += "<li style='color:#fbbf24;font-weight:bold;margin-top:10px;'>Raw Dumps:</li>";
+                data.raw.forEach(f => {
+                    historyList.innerHTML += `<li style="cursor:pointer; margin-bottom:4px;" onclick="readHistory('${f}')">🕷️ ${f}</li>`;
+                });
+            }
+        } catch(e) {
+            console.error("Failed to load history", e);
+        }
+    };
+
+    window.readHistory = async (filename) => {
+        try {
+            const res = await fetch(`/api/history/read/${filename}`);
+            const data = await res.json();
+            outputArea.innerHTML = "";
+            const resultEl = document.createElement("div");
+            resultEl.classList.add("markdown-body");
+            resultEl.innerHTML = marked.parse(`### Reading: ${filename}\n\n\`\`\`\n${data.content}\n\`\`\``);
+            outputArea.appendChild(resultEl);
+        } catch(e) {
+            console.error("Failed to read file", e);
+        }
+    };
+
+    document.getElementById("refresh-history-btn").addEventListener("click", loadHistory);
+    document.getElementById("delete-raw-btn").addEventListener("click", async () => {
+        await fetch("/api/history/delete/raw", { method: "DELETE" });
+        loadHistory();
+    });
+    document.getElementById("delete-processed-btn").addEventListener("click", async () => {
+        await fetch("/api/history/delete/processed", { method: "DELETE" });
+        loadHistory();
+    });
+
+    // Initial load
+    loadHistory();
 });

@@ -74,5 +74,57 @@ def interactive():
         except Exception as e:
             console.print(f"[red]Error: {e}[/red]")
 
+@app.command()
+def history(
+    read: str = typer.Option(None, "--read", "-r", help="Read a specific file from raw or processed workspace"),
+    delete_raw: bool = typer.Option(False, "--delete-raw", help="Delete all raw data dumps"),
+    delete_processed: bool = typer.Option(False, "--delete-processed", help="Delete all processed reports")
+):
+    """Manage past operations, raw scrapes, and processed reports."""
+    raw_dir = os.path.join(project_root, "workspace", "raw")
+    processed_dir = os.path.join(project_root, "workspace", "processed")
+    
+    if delete_raw:
+        for f in os.listdir(raw_dir):
+            os.remove(os.path.join(raw_dir, f))
+        console.print("[bold red]All raw data dumps deleted.[/bold red]")
+        return
+        
+    if delete_processed:
+        for f in os.listdir(processed_dir):
+            os.remove(os.path.join(processed_dir, f))
+        console.print("[bold red]All processed reports deleted.[/bold red]")
+        return
+        
+    if read:
+        raw_path = os.path.join(raw_dir, read)
+        proc_path = os.path.join(processed_dir, read)
+        if os.path.exists(proc_path):
+            with open(proc_path, "r", encoding="utf-8") as f:
+                console.print(Panel(f.read(), title=f"Processed: {read}"))
+        elif os.path.exists(raw_path):
+            with open(raw_path, "r", encoding="utf-8") as f:
+                console.print(Panel(f.read()[:2000] + "\n...[TRUNCATED]", title=f"Raw: {read}"))
+        else:
+            console.print(f"[red]File '{read}' not found in raw or processed folders.[/red]")
+        return
+        
+    # List files
+    console.print(Panel.fit("[bold cyan]Past Operations History[/bold cyan]", border_style="cyan"))
+    
+    console.print("\n[bold yellow]Processed Reports:[/bold yellow]")
+    if os.path.exists(processed_dir) and os.listdir(processed_dir):
+        for f in os.listdir(processed_dir):
+            console.print(f" - {f}")
+    else:
+        console.print(" (No processed reports found)")
+        
+    console.print("\n[bold magenta]Raw Data Dumps:[/bold magenta]")
+    if os.path.exists(raw_dir) and os.listdir(raw_dir):
+        for f in os.listdir(raw_dir):
+            console.print(f" - {f}")
+    else:
+        console.print(" (No raw data found)")
+
 if __name__ == "__main__":
     app()
