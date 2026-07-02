@@ -90,8 +90,25 @@ async def scrape_url(url: str, method: str = "playwright") -> str:
                     
                 page = await context.new_page()
                 
+                # Stealth plugins to evade bot detection
+                await page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+                await page.add_init_script("Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3]})")
+                
                 # Wait until network is mostly idle to bypass basic captchas/Cloudflare challenges
                 await page.goto(url, wait_until="networkidle", timeout=30000)
+                
+                # Human-like macros (random mouse movements and scrolling) to bypass recaptcha
+                import random
+                for _ in range(3):
+                    x = random.randint(100, 800)
+                    y = random.randint(100, 800)
+                    await page.mouse.move(x, y, steps=10)
+                    await page.mouse.wheel(0, random.randint(100, 500))
+                    await page.wait_for_timeout(random.randint(500, 1500))
+                
+                # Take screenshot for debugging/captcha solving pipeline
+                os.makedirs(os.path.join(os.getcwd(), "workspace", "debug"), exist_ok=True)
+                await page.screenshot(path=os.path.join(os.getcwd(), "workspace", "debug", "last_scrape.png"))
                 
                 content = await page.content()
                 await browser.close()

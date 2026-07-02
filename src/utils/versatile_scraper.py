@@ -21,12 +21,23 @@ async def versatile_scrape(url: str, use_stealth: bool = True) -> str:
         # Simple stealth properties to bypass basic bot detectors
         if use_stealth:
             await page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+            await page.add_init_script("Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3]})")
 
         try:
             await page.goto(url, wait_until="networkidle", timeout=30000)
             
-            # Wait a moment for dynamic content to load
-            await page.wait_for_timeout(2000)
+            # Human-like macros (random mouse movements and scrolling)
+            import random
+            for _ in range(3):
+                x = random.randint(100, 800)
+                y = random.randint(100, 800)
+                await page.mouse.move(x, y, steps=10)
+                await page.mouse.wheel(0, random.randint(100, 500))
+                await page.wait_for_timeout(random.randint(500, 1500))
+            
+            # Take screenshot of captcha if needed for debugging
+            os.makedirs(os.path.join(os.getcwd(), "workspace", "debug"), exist_ok=True)
+            await page.screenshot(path=os.path.join(os.getcwd(), "workspace", "debug", "last_scrape.png"))
             
             html = await page.content()
             soup = bs4.BeautifulSoup(html, 'html.parser')
