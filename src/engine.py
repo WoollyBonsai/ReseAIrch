@@ -22,16 +22,19 @@ class ADKEngine:
         self.reviewer = ReviewerAgent(model_source=model_source)
         self.coder = CoderAgent(model_source=model_source)
 
-    async def run_research_pipeline(self, objective: str, max_depth: int = 1, collection_name: str = "default_research") -> Dict[str, Any]:
+    async def run_research_pipeline(self, objective: str, max_depth: int = 1, base_collection_name: str = "default_research") -> Dict[str, Any]:
         """
         Executes the full multi-agent pipeline.
         1. Planner: Breaks down the objective into a DAG and determines formatting demand.
         2. Harvester: Executes the scraping jobs against the DAG.
         3. Synthesizer: Pulls from memory and formats the output.
         """
+        import time
+        collection_name = f"{base_collection_name}_{int(time.time())}"
+        
         print("\n--- [Phase 1: Planning] ---")
         dag = self.planner.plan_research(objective, max_depth)
-        format_demand = dag.get("format_demand", "Markdown")
+        format_demand = "Markdown" # Hardcoded to simple markdown to prevent LLM confusion
         print(f"Planned {len(dag.get('tasks', []))} tasks. Demanded format: {format_demand}")
 
         print("\n--- [Phase 2: Harvesting] ---")

@@ -24,7 +24,6 @@ class PlannerAgent:
         
         Return ONLY valid JSON. Format:
         {
-            "format_demand": "JSON-L | Markdown | CSV",
             "tasks": [
                 {"id": "t1", "query": "SQL injection guide site:owasp.org", "type": "search"},
                 {"id": "t2", "query": "https://portswigger.net/web-security/sql-injection", "type": "scrape", "use_cookies": true}
@@ -47,4 +46,4 @@ class PlannerAgent:
             return json.loads(content)
         except Exception as e:
             print(f"Planner Error: {e}")
-            return {"format_demand": "Markdown", "tasks": []}
+            return {"tasks": []}

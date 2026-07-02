@@ -15,7 +15,7 @@ class SynthesizerAgent:
         os.makedirs(os.path.join(os.getcwd(), "workspace", "processed"), exist_ok=True)
 
     def apply_dynamic_formatting(self, raw_context: str, format_demand: str, objective: str) -> dict:
-        print(f"Synthesizer Agent applying dynamic formatting: {format_demand}")
+        print(f"Synthesizer Agent applying dynamic formatting (No JSON enforcement)")
         
         system_prompt = f"""
         You are the Synthesizer Agent. Your job is to analyze the Raw Context and fulfill the user's objective.
@@ -23,12 +23,8 @@ class SynthesizerAgent:
         USER OBJECTIVE:
         {objective}
         
-        REQUESTED FORMAT: {format_demand}
-        
-        You MUST output your response as a raw JSON object (and nothing else). 
-        The keys of the JSON must be appropriate filenames (e.g., 'report.md', 'data.json', 'summary.txt') that fit the objective.
-        The values must be the full string content for that file.
-        Do not wrap the JSON in markdown code blocks.
+        Write an extensive, beautifully formatted Markdown report based on the context.
+        Do NOT output JSON. Just output raw markdown text.
         """
         
         try:
@@ -38,24 +34,11 @@ class SynthesizerAgent:
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": f"Raw Context:\n{raw_context}"}
                 ],
-                api_base=self.api_base,
-                response_format={ "type": "json_object" } if "ollama" not in self.model else None # Ollama handles json prompting via system prompt, OpenAI uses this
+                api_base=self.api_base
             )
             content = response.choices[0].message.content.strip()
-            try:
-                # Some models might wrap JSON inside ```json
-                if "```json" in content:
-                    json_str = content.split("```json")[1].split("```")[0].strip()
-                elif "```" in content:
-                    json_str = content.split("```")[1].strip()
-                else:
-                    json_str = content
-                    
-                return json.loads(json_str, strict=False)
-            except Exception:
-                # If it's completely not JSON, assume the model generated a single raw markdown report
-                print("Synthesizer could not parse JSON, falling back to raw markdown dump.")
-                return {"final_report_fallback.md": content}
+            
+            return {"final_report.md": content}
                 
         except Exception as e:
             print(f"Synthesizer Error: {e}")
