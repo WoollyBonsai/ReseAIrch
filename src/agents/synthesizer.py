@@ -14,17 +14,20 @@ class SynthesizerAgent:
         self.api_base = os.getenv("OLLAMA_API_BASE", "http://localhost:11434") if "ollama" in model_source else None
         os.makedirs(os.path.join(os.getcwd(), "workspace", "processed"), exist_ok=True)
 
-    def apply_dynamic_formatting(self, raw_context: str, format_demand: str) -> dict:
+    def apply_dynamic_formatting(self, raw_context: str, format_demand: str, objective: str) -> dict:
         print(f"Synthesizer Agent applying dynamic formatting: {format_demand}")
         
         system_prompt = f"""
-        You are the Synthesizer Agent. Your job is to format the raw data strictly as requested.
-        The user has demanded format: {format_demand} AND requested full-scale reports categorized by different methods/topics as you understand them.
-        Do NOT just write a short summary. Write extensive, comprehensive guides.
+        You are the Synthesizer Agent. Your job is to analyze the Raw Context and fulfill the user's objective.
+        
+        USER OBJECTIVE:
+        {objective}
+        
+        REQUESTED FORMAT: {format_demand}
         
         You MUST output your response as a raw JSON object (and nothing else). 
-        The keys of the JSON must be appropriate filenames (e.g., 'nmap_scanning_methods.md', 'owasp_testing_guide.md', 'training_data.jsonl').
-        The values must be the full-scale string content for that file.
+        The keys of the JSON must be appropriate filenames (e.g., 'report.md', 'data.json', 'summary.txt') that fit the objective.
+        The values must be the full string content for that file.
         Do not wrap the JSON in markdown code blocks.
         """
         
@@ -65,7 +68,7 @@ class SynthesizerAgent:
         if "Error" in raw_context or "No relevant information found" in raw_context:
             print("Warning: Could not retrieve robust context from memory.")
             
-        file_map = self.apply_dynamic_formatting(raw_context, format_demand)
+        file_map = self.apply_dynamic_formatting(raw_context, format_demand, objective)
         
         # Save output
         print(f"Synthesizer extracted {len(file_map)} categorized reports.")
