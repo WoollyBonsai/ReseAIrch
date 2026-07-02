@@ -35,6 +35,17 @@ async def versatile_scrape(url: str, use_stealth: bool = True) -> str:
                 await page.mouse.wheel(0, random.randint(100, 500))
                 await page.wait_for_timeout(random.randint(500, 1500))
             
+            # Auto-solve basic Cloudflare Turnstile / Captcha clicks
+            try:
+                cf_iframe = await page.query_selector("iframe[src*='cloudflare']")
+                if cf_iframe:
+                    box = await cf_iframe.bounding_box()
+                    if box:
+                        await page.mouse.click(box['x'] + box['width'] / 2, box['y'] + box['height'] / 2)
+                        await page.wait_for_timeout(5000)
+            except Exception:
+                pass
+            
             # Take screenshot of captcha if needed for debugging
             os.makedirs(os.path.join(os.getcwd(), "workspace", "debug"), exist_ok=True)
             await page.screenshot(path=os.path.join(os.getcwd(), "workspace", "debug", "last_scrape.png"))

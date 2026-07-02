@@ -62,6 +62,19 @@ def delete_processed():
             os.remove(os.path.join(processed_dir, f))
     return JSONResponse(content={"status": "success"})
 
+class MemoryQuery(BaseModel):
+    query: str
+    collection_name: str = "default_research"
+
+@app.post("/api/memory/query")
+def query_memory_db(req: MemoryQuery):
+    try:
+        from src.mcp_servers.memory_server import query_memory
+        results = query_memory(req.collection_name, req.query, n_results=5)
+        return JSONResponse(content={"status": "success", "results": results})
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
+
 # Serve static files
 app.mount("/static", StaticFiles(directory=os.path.join(os.path.dirname(__file__), "static")), name="static")
 

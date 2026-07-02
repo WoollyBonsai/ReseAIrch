@@ -126,6 +126,41 @@ document.addEventListener("DOMContentLoaded", () => {
         loadHistory();
     });
 
+    // Memory Query Logic
+    document.getElementById("memory-search-btn").addEventListener("click", async () => {
+        const query = document.getElementById("memory-query").value.trim();
+        const collection = document.getElementById("collection").value.trim();
+        if(!query) return;
+        
+        outputArea.innerHTML = `<div style="color: #60a5fa;">Querying Memory DB for: "${query}"...</div>`;
+        try {
+            const res = await fetch("/api/memory/query", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ query: query, collection_name: collection })
+            });
+            const data = await res.json();
+            
+            if (data.status === "success") {
+                outputArea.innerHTML = `<h3 style="color: #34d399;">Memory Results</h3>`;
+                data.results.forEach((result, idx) => {
+                    const resultEl = document.createElement("div");
+                    resultEl.classList.add("markdown-body");
+                    resultEl.style.border = "1px solid rgba(255,255,255,0.1)";
+                    resultEl.style.padding = "10px";
+                    resultEl.style.marginBottom = "10px";
+                    resultEl.style.borderRadius = "8px";
+                    resultEl.innerHTML = marked.parse(`**Match ${idx + 1}**\n\n${result}`);
+                    outputArea.appendChild(resultEl);
+                });
+            } else {
+                outputArea.innerHTML = `<div style="color: #ef4444;">Error: ${data.message}</div>`;
+            }
+        } catch(e) {
+            outputArea.innerHTML = `<div style="color: #ef4444;">Error querying memory: ${e.message}</div>`;
+        }
+    });
+
     // Initial load
     loadHistory();
 });

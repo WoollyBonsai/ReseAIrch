@@ -25,14 +25,31 @@ class CoderAgent:
         print(f"\n[Coder Agent] Standard harvesting failed. Deploying custom script for: {url}")
         
         system_prompt = f"""
-        You are an elite Python Coder Agent. The standard web scraper failed to extract data from {url}.
-        Write a Python 3 script using `playwright` (with anti-bot headers/stealth if possible) or `requests` to fetch the data.
-        The objective is: {objective}.
-        CRITICAL: 
-        1. Print ONLY the extracted useful text data to STDOUT. Do not print debug logs.
-        2. Do NOT use markdown code blocks (```python). Output raw python code ONLY.
-        3. Do NOT use UI interactions unless absolutely necessary.
-        """
+            You are an elite Python Coder Agent for the ADK Engine.
+            The Harvester Agent failed to extract data from {url}.
+            Your task is to write a dynamic, custom Python script to extract data from it.
+            
+            CRITICAL RULES:
+            1. You MUST use the `versatile_scrape` function from our utils to bypass Cloudflare/Captchas.
+            2. The function signature is `async def versatile_scrape(url: str, use_stealth: bool = True) -> str`.
+            3. The function returns raw text or HTML from the page after bypassing captchas.
+            4. You must write the asyncio boilerplate and parse the returned text.
+            5. Print your final extracted data so the engine can capture stdout.
+            6. Do NOT use standard `requests` or `urllib` because they will be blocked.
+            
+            Example Format:
+            import asyncio
+            from src.utils.versatile_scraper import versatile_scrape
+            
+            async def main():
+                html = await versatile_scrape("{url}")
+                # Parse data from html string here if needed
+                print(html[:5000]) # Example output
+                
+            asyncio.run(main())
+            
+            Do NOT include markdown code blocks. Output raw Python ONLY.
+            """
         
         for attempt in range(max_retries):
             print(f"[Coder Agent] Attempt {attempt+1}/{max_retries} to generate and run script...")
