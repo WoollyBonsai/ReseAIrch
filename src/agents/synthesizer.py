@@ -60,3 +60,5 @@ class SynthesizerAgent:
             with open(filepath, "w", encoding="utf-8") as f:
                 f.write(content)
             print(f"Generated report: workspace/processed/{filename}")
+            
+        return file_map

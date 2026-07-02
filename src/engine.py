@@ -14,7 +14,7 @@ class ADKEngine:
     This class orchestrates the Multi-Agent System. It initializes the
     Planner, Harvester, and Synthesizer agents and routes the state between them.
     """
-    def __init__(self, model_source: str = "ollama/mistral-nemo"):
+    def __init__(self, model_source: str = "ollama/llama3.1"):
         print(f"Initializing ADK Engine with {model_source}...")
         self.planner = PlannerAgent(model_source=model_source)
         self.harvester = HarvesterAgent()
@@ -51,27 +51,15 @@ class ADKEngine:
 
         print("\n--- [Phase 4: Synthesizing] ---")
         # Pulls data from Memory Server and formats it
-        await self.synthesizer.generate_output(objective, collection_name, format_demand)
+        file_map = await self.synthesizer.generate_output(objective, collection_name, format_demand)
         
-        processed_dir = os.path.join(os.getcwd(), "workspace", "processed")
         final_content = "Error: Output file not generated."
-        
-        if os.path.exists(processed_dir):
-            files = [f for f in os.listdir(processed_dir) if not f.startswith("error")]
-            if files:
-                # Read the first successful processed file for the CLI snippet
-                output_path = os.path.join(processed_dir, files[0])
-                try:
-                    with open(output_path, "r", encoding="utf-8") as f:
-                        final_content = f"File: {files[0]}\n\n" + f.read()
-                except Exception as e:
-                    final_content = f"Error reading generated report: {e}"
-            else:
-                # If only error fallback exists
-                error_path = os.path.join(processed_dir, "error_report.txt")
-                if os.path.exists(error_path):
-                    with open(error_path, "r", encoding="utf-8") as f:
-                        final_content = "Synthesizer Error Fallback:\n" + f.read()
+        if file_map and "final_report.md" in file_map:
+            final_content = file_map["final_report.md"]
+        elif file_map:
+            # Fallback to the first available content
+            first_key = list(file_map.keys())[0]
+            final_content = file_map[first_key]
 
         return {
             "status": "success",

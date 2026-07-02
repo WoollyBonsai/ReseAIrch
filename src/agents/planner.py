@@ -22,6 +22,10 @@ class PlannerAgent:
         Subsequent tasks should represent the deep links that we expect to find and crawl. 
         You must also specify if cookies are needed for a specific target.
         
+        CRITICAL RULES:
+        1. When generating a "search" query, use PLAIN ENGLISH. Do NOT use regex, HTML, or raw DuckDuckGo URLs. (e.g., Use "top educational websites" NOT "https://duckduckgo.com/?q=...").
+        2. When generating a "scrape" URL, you MUST ONLY use real, known URLs. Do NOT hallucinate placeholders like "example.com" or "example.edu". If you don't know a specific URL, just use a "search" task instead!
+        
         Return ONLY valid JSON. Format:
         {
             "tasks": [
