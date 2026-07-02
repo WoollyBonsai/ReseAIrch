@@ -6,7 +6,8 @@ from rich.console import Console
 from rich.panel import Panel
 
 # Ensure imports work regardless of execution directory
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(project_root)
 from src.engine import ADKEngine
 
 app = typer.Typer(help="ReseAIrch: Autonomous ADK Research Orchestrator")
