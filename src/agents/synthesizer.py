@@ -45,7 +45,7 @@ class SynthesizerAgent:
             if content.endswith("```"):
                 content = content[:-3]
             
-            return json.loads(content.strip())
+            return json.loads(content.strip(), strict=False)
         except Exception as e:
             print(f"Synthesizer Error: {e}")
             return {"error_report.txt": str(e), "raw_fallback.txt": raw_context[:1000]}

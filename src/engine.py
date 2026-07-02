@@ -39,14 +39,25 @@ class ADKEngine:
         # Pulls data from Memory Server and formats it
         await self.synthesizer.generate_output(objective, collection_name, format_demand)
         
-        output_file = "training_data.jsonl" if "JSON" in format_demand else "research_summary.md"
-        output_path = os.path.join(os.getcwd(), "workspace", output_file)
+        processed_dir = os.path.join(os.getcwd(), "workspace", "processed")
+        final_content = "Error: Output file not generated."
         
-        try:
-            with open(output_path, "r") as f:
-                final_content = f.read()
-        except FileNotFoundError:
-            final_content = "Error: Output file not generated."
+        if os.path.exists(processed_dir):
+            files = [f for f in os.listdir(processed_dir) if not f.startswith("error")]
+            if files:
+                # Read the first successful processed file for the CLI snippet
+                output_path = os.path.join(processed_dir, files[0])
+                try:
+                    with open(output_path, "r", encoding="utf-8") as f:
+                        final_content = f"File: {files[0]}\n\n" + f.read()
+                except Exception as e:
+                    final_content = f"Error reading generated report: {e}"
+            else:
+                # If only error fallback exists
+                error_path = os.path.join(processed_dir, "error_report.txt")
+                if os.path.exists(error_path):
+                    with open(error_path, "r", encoding="utf-8") as f:
+                        final_content = "Synthesizer Error Fallback:\n" + f.read()
 
         return {
             "status": "success",
