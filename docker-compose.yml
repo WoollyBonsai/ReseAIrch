@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  reseairch-web:
+    build: .
+    container_name: reseairch_web
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./workspace:/app/workspace
+      - ./temp:/app/temp
+      - ./cookies.json:/app/cookies.json
+      - ./.env:/app/.env
+    environment:
+      - OLLAMA_API_BASE=${OLLAMA_API_BASE:-http://host.docker.internal:11434}
+    command: uvicorn src.ui.web:app --host 0.0.0.0 --port 8080
+    profiles:
+      - web
+
+  reseairch-cli:
+    build: .
+    container_name: reseairch_cli
+    volumes:
+      - ./workspace:/app/workspace
+      - ./temp:/app/temp
+      - ./cookies.json:/app/cookies.json
+      - ./.env:/app/.env
+    environment:
+      - OLLAMA_API_BASE=${OLLAMA_API_BASE:-http://host.docker.internal:11434}
+    command: python src/ui/cli.py interactive
+    profiles:
+      - cli
+
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: reseairch_chromadb
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./workspace/chroma:/chroma/chroma
