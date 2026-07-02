@@ -7,8 +7,8 @@ Designed to process everything from raw technical documentation to deep academic
 ## Key Features (Capstone Requirements Fulfilled)
 * **Multi-Agent System (ADK):** Powered by an ADK-inspired architecture consisting of three specialized roles:
   * 🧠 **Planner Agent:** Creates the Directed Acyclic Graph (DAG) for research objectives.
-  * 🕷️ **Harvester Agent:** Executes the tasks, bypasses standard scrapes using `bs4`, and safely dumps raw data files.
-  * ✍️ **Synthesizer Agent:** Analyzes the raw vector memory and outputs categorized, multi-file academic reports.
+  * 🕷️ **Harvester Agent:** Executes the tasks, bypasses standard scrapes using `bs4`, and safely dumps raw data files to `workspace/raw/` for auditing and data integrity.
+  * ✍️ **Synthesizer Agent:** Analyzes the raw vector memory and categorizes findings into massive, multi-file academic reports in `workspace/processed/`.
 * **Model Context Protocol (MCP) Servers:** Implements distinct decoupled servers for `Scraping` and `ChromaDB Memory`.
 * **Dynamic Formatting:** Natively capable of writing JSON-L outputs (for Model Fine-Tuning tracks) and full-scale Markdown guides (for Agents for Good tracks).
 * **Versatile UIs:** Fully functional as a CLI interface or a highly-polished Glassmorphism Web App UI.
