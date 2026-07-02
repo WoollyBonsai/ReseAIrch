@@ -24,17 +24,9 @@ async def run_pipeline(req: ResearchRequest):
     except Exception as e:
         return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
 
-# A simple html response for root just to prove it works
+# Serve static files
+app.mount("/static", StaticFiles(directory=os.path.join(os.path.dirname(__file__), "static")), name="static")
+
 @app.get("/")
 def read_root():
-    html_content = """
-    <html>
-        <head><title>ReseAIrch Web Interface</title></head>
-        <body style="font-family: sans-serif; padding: 2rem; background: #0f172a; color: white;">
-            <h1>ReseAIrch ADK Web Interface</h1>
-            <p>API is running. Send POST requests to /api/run</p>
-        </body>
-    </html>
-    """
-    from fastapi.responses import HTMLResponse
-    return HTMLResponse(content=html_content)
+    return FileResponse(os.path.join(os.path.dirname(__file__), "static", "index.html"))

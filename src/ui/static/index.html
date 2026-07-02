@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReseAIrch: ADK Control Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <div class="background-blob blob-1"></div>
+    <div class="background-blob blob-2"></div>
+    
+    <div class="container">
+        <header class="glass-panel">
+            <div class="brand">
+                <h1>ReseAIrch</h1>
+                <span class="badge">ADK Multi-Agent System</span>
+            </div>
+            <p>Orchestrating bulk scraping and synthesis operations.</p>
+        </header>
+
+        <div class="main-content">
+            <aside class="controls glass-panel">
+                <h3>Parameters</h3>
+                <div class="form-group">
+                    <label for="model">Model Engine</label>
+                    <select id="model">
+                        <option value="ollama/mistral-nemo">Mistral-Nemo (Local - Best for Context)</option>
+                        <option value="ollama/llama3.1">Llama 3.1 (Local - Best for Speed)</option>
+                        <option value="gemini/gemini-1.5-pro">Gemini 1.5 Pro</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="depth">Scraping Depth</label>
+                    <input type="range" id="depth" min="1" max="3" value="1" oninput="document.getElementById('depth-val').innerText = this.value">
+                    <span id="depth-val">1</span>
+                </div>
+                <div class="form-group">
+                    <label for="collection">Memory Collection</label>
+                    <input type="text" id="collection" value="default_research" placeholder="e.g., project_quantum">
+                </div>
+            </aside>
+
+            <section class="workspace glass-panel">
+                <div id="output-area" class="output-area">
+                    <div class="placeholder-text">Awaiting research directives... (Specify JSON-L or Markdown in your prompt for precise formatting)</div>
+                </div>
+                
+                <div id="loading" class="loading hidden">
+                    <div class="spinner"></div>
+                    <p>ADK Agents Synchronizing...</p>
+                    <small>Planner -> Harvester -> Synthesizer</small>
+                </div>
+
+                <div class="input-container">
+                    <div class="terminal-prefix">SYS&gt;</div>
+                    <input type="text" id="command-input" placeholder="e.g., 'Gather raw training data on neural networks and format as JSON-L'" autocomplete="off">
+                    <button id="send-btn" class="glass-btn">Dispatch Agents</button>
+                </div>
+            </section>
+        </div>
+    </div>
+    <script src="/static/script.js"></script>
+</body>
+</html>
