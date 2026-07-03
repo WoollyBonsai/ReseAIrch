@@ -23,8 +23,9 @@ class SynthesizerAgent:
         USER OBJECTIVE:
         {objective}
         
-        Write an extensive, beautifully formatted Markdown report based on the context.
-        Do NOT output JSON. Just output raw markdown text.
+        CRITICAL INSTRUCTION: You MUST start your response with a <think> block to reason about the context.
+        Inside <think> ... </think>, list the facts you found and how they map to the requested format.
+        After the </think> tag, output your beautifully formatted Markdown report. Do NOT output JSON.
         """
         
         try:
@@ -36,9 +37,13 @@ class SynthesizerAgent:
                 ],
                 api_base=self.api_base
             )
+            import re
             content = response.choices[0].message.content.strip()
             
-            return {"final_report.md": content}
+            # Strip out the <think> blocks from the final output
+            content_clean = re.sub(r'<think>.*?</think>', '', content, flags=re.DOTALL).strip()
+            
+            return {"final_report.md": content_clean}
                 
         except Exception as e:
             print(f"Synthesizer Error: {e}")

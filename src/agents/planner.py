@@ -28,9 +28,10 @@ class PlannerAgent:
         
         Return ONLY valid JSON. Format:
         {
+            "thought_process": "Write your step-by-step logic here on why you selected these search queries and URLs.",
             "tasks": [
-                {"id": "t1", "query": "SQL injection guide site:owasp.org", "type": "search"},
-                {"id": "t2", "query": "https://portswigger.net/web-security/sql-injection", "type": "scrape", "use_cookies": true}
+                {"id": "t1", "query": "top educational websites", "type": "search"},
+                {"id": "t2", "query": "https://en.wikipedia.org/wiki/List_of_educational_websites", "type": "scrape", "use_cookies": true}
             ]
         }
         """
